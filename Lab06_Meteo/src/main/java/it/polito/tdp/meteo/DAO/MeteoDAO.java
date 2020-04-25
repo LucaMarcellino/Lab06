@@ -9,15 +9,18 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import it.polito.tdp.meteo.model.Citta;
 import it.polito.tdp.meteo.model.Rilevamento;
 
 public class MeteoDAO {
+		List<Citta> citta = new ArrayList<Citta>();
 	
 	public List<Rilevamento> getAllRilevamenti() {
 
 		final String sql = "SELECT Localita, Data, Umidita FROM situazione ORDER BY data ASC";
 
 		List<Rilevamento> rilevamenti = new ArrayList<Rilevamento>();
+		
 
 		try {
 			Connection conn = ConnectDB.getConnection();
@@ -41,7 +44,7 @@ public class MeteoDAO {
 		}
 	}
 
-	public List<Rilevamento> getAllRilevamentiLocalitaMese(int mese, String localita) {
+	public List<Rilevamento> getAllRilevamentiLocalitaMese(int mese, Citta c) {
 		final String sql = "SELECT ?, Data, Umidita FROM situazione WHERE Data=? and Localita=?";
 		List<Rilevamento> rilevamentiMese = new ArrayList<Rilevamento>();
 		
@@ -49,8 +52,8 @@ public class MeteoDAO {
 		try {
 			Connection conn = ConnectDB.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
-			st.setString(1, localita);
-			st.setString(3, localita);
+			st.setString(1, c.getNome());
+			st.setString(3, c.getNome());
 			
 			Rilevamento r;
 			
@@ -59,7 +62,7 @@ public class MeteoDAO {
 				st.setString(2, s);
 				ResultSet rs= st.executeQuery();
 				while(rs.next()) {
-					r = new Rilevamento(localita,rs.getDate("Data"),rs.getInt("Umidita")); 
+					r = new Rilevamento(c.getNome(),rs.getDate("Data"),rs.getInt("Umidita")); 
 					rilevamentiMese.add(r);
 					
 				}
@@ -77,8 +80,8 @@ public class MeteoDAO {
 		
 	}
 
-	public double getAvgRilevamentiLocalitaMese(int mese, String localita) {
-			List<Rilevamento> rilevamenti= new ArrayList<Rilevamento>(this.getAllRilevamentiLocalitaMese(mese, localita));
+	public double getAvgRilevamentiLocalitaMese(int mese, Citta c) {
+			List<Rilevamento> rilevamenti= new ArrayList<Rilevamento>(this.getAllRilevamentiLocalitaMese(mese, c));
 		
 			double media=0.0;
 			int somma=0;
@@ -91,6 +94,31 @@ public class MeteoDAO {
 		return media;
 	}
 	
+	public List<Citta> getCitta(){
+		String sql="SELECT Localita FROM situazione";
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs= st.executeQuery();
+			
+			while(rs.next()) {
+				Citta c= new Citta(rs.getString("Localita"));
+				citta.add(c);
+				
+			}
+			
+			conn.close();
+			return citta;
+			
+			} catch (SQLException e) {
+
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+			
+		
+		
+	}
 	
 
 

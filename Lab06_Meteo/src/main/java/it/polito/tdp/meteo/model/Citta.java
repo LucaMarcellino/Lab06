@@ -75,7 +75,7 @@ public class Citta {
 
 	@Override
 	public String toString() {
-		return nome;
+		return nome+"\n";
 	}
 	
 
